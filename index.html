@@ -882,7 +882,9 @@
       })
     })
     .then(() => {
-      btn.disabled = false;
+      btn.disabled = true;                    // keep disabled
+      btn.textContent = '✅ Erfolgreich gesendet';  // confirm success
+      btn.style.background = 'var(--green)';  // turn it green
       document.getElementById('prog-fill').style.width = '100%';
       document.getElementById('prog-pct').textContent  = '100%';
       document.getElementById('success-screen').style.display = 'block';
