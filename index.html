@@ -662,7 +662,7 @@
   <div id="success-screen">
     <div class="success-ring">🎉</div>
     <div class="success-title">Bewerbung abgeschickt!</div>
-    <div class="success-sub">Vielen Dank für deine Initiative! Dein Outlook wurde geöffnet — bitte die E-Mail noch absenden. Wir melden uns, sobald die Vergabe der Testlizenzen startet.</div>
+    <div class="success-sub">Vielen Dank! Deine Bewerbung wurde erfolgreich gesendet. Wir melden uns, sobald die Vergabe der Testlizenzen startet.</div>
   </div>
 
 </div><!-- /page-wrap -->
@@ -861,17 +861,41 @@
       'Gesendet via Copilot Premium Anfrage-Formular'
     ].join('\n');
 
-    const subject    = encodeURIComponent(`[Copilot Premium] Anfrage – ${v('f-name')} (${ucCount} Use Case${ucCount > 1 ? 's' : ''})`);
-    const mailtoUrl  = `mailto:${SUBMIT_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
-
-    window.location.href = mailtoUrl;
-
-    document.getElementById('prog-fill').style.width = '100%';
-    document.getElementById('prog-pct').textContent  = '100%';
-    document.getElementById('success-screen').style.display = 'block';
-    setTimeout(() => {
-      document.getElementById('success-screen').scrollIntoView({ behavior: 'smooth' });
-    }, 200);
+    // ── Config ──────────────────────
+    const FLOW_URL = 'YOUR_POWER_AUTOMATE_HTTP_URL_HERE'; // ← paste your flow URL
+    // ────────────────────────────────
+    
+    const subject = `[Copilot Premium] Anfrage – ${v('f-name')} (${ucCount} Use Case${ucCount > 1 ? 's' : ''})`;
+    
+    // Disable button to prevent double-submit
+    const btn = document.querySelector('.submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Wird gesendet…';
+    
+    fetch(FLOW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to:      SUBMIT_EMAIL,
+        subject: subject,
+        body:    body.replace(/\n/g, '<br>')  // HTML line breaks for email
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Flow returned ' + res.status);
+      // Show success
+      document.getElementById('prog-fill').style.width = '100%';
+      document.getElementById('prog-pct').textContent  = '100%';
+      document.getElementById('success-screen').style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('success-screen').scrollIntoView({ behavior: 'smooth' });
+      }, 200);
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = 'Bewerbung absenden ✦';
+      alert('Fehler beim Senden. Bitte versuche es erneut.\n' + err.message);
+    });
   }
 
   // Init: render the first use case block on page load
