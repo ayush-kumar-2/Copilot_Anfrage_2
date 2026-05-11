@@ -874,7 +874,8 @@
     
     fetch(FLOW_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',                      // ← bypasses the preflight
+      headers: { 'Content-Type': 'text/plain' },  
       body: JSON.stringify({
         to:      SUBMIT_EMAIL,
         subject: subject,
